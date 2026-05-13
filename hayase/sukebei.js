@@ -1,5 +1,5 @@
-export default new class Nyaa {
-  base = 'https://nyaa.si'
+export default new class Sukebei {
+  base = 'https://sukebei.nyaa.si'
 
   async single({ titles, episode }) {
     if (!titles?.length) return []
