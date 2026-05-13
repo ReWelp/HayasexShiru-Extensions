@@ -1,8 +1,0 @@
-{
-  "name": "@rewelp/shiru-extensions",
-  "version": "1.0.0",
-  "description": "Nyaa and Sukebei extensions for Shiru",
-  "license": "GPLv3",
-  "main": "index.json",
-  "types": "sources/index.d.ts"
-}
