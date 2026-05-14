@@ -1,4 +1,4 @@
-export default new class Nyaa {
+module.exports = new class Nyaa {
   base = 'https://torrent-search-api-livid.vercel.app/api/nyaasi/'
 
   async single({ titles, episode }) {
@@ -10,29 +10,52 @@ export default new class Nyaa {
   movie = this.single
 
   async search(title, episode) {
-    let query = title.replace(/[^\w\s-]/g, ' ').trim()
-    if (episode) query += ` ${episode.toString().padStart(2, '0')}`
+    try {
+      if (!title) return []
 
-    const res = await fetch(this.base + encodeURIComponent(query))
-    const data = await res.json()
-    if (!Array.isArray(data)) return []
+      let query = title.replace(/[^\w\s-]/g, ' ').trim()
 
-    return data.map(item => ({
-      title: item.Name,
-      link: item.Magnet,
-      hash: item.Magnet?.match(/btih:([A-Fa-f0-9]+)/)?.[1] || '',
-      seeders: Number(item.Seeders || 0),
-      leechers: Number(item.Leechers || 0),
-      downloads: Number(item.Downloads || 0),
-      size: 0,
-      date: new Date(item.DateUploaded),
-      accuracy: 'medium',
-      type: 'alt'
-    }))
+      if (episode !== undefined && episode !== null) {
+        query += ` ${String(episode).padStart(2, '0')}`
+      }
+
+      const res = await fetch(this.base + encodeURIComponent(query))
+      if (!res.ok) return []
+
+      const data = await res.json()
+      if (!Array.isArray(data)) return []
+
+      return data.map(item => ({
+        title: item.Name || 'Unknown',
+        link: item.Magnet || '',
+
+        hash:
+          item.Magnet?.match(/btih:([A-Za-z0-9]+)/)?.[1] || '',
+
+        seeders: Number(item.Seeders ?? 0),
+        leechers: Number(item.Leechers ?? 0),
+        downloads: Number(item.Downloads ?? 0),
+
+        size: item.Size || 'Unknown',
+
+        date: item.DateUploaded
+          ? new Date(item.DateUploaded)
+          : new Date(0),
+
+        accuracy: 'medium',
+        type: 'torrent'
+      }))
+    } catch (err) {
+      return []
+    }
   }
 
   async test() {
-    const res = await fetch(this.base + 'one%20piece')
-    return res.ok
+    try {
+      const res = await fetch(this.base + 'one%20piece')
+      return res.ok
+    } catch {
+      return false
+    }
   }
-}()
+}
